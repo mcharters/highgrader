@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⛏️ HIGH GRADER ⛏️</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0d0d1a;
+            text-align: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Starfield background */
+        .stars {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite alternate;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.2; }
+            100% { opacity: 1; }
+        }
+
+        /* Emoji art container */
+        .emoji-art {
+            position: relative;
+            z-index: 1;
+            user-select: none;
+            padding: 20px 10px;
+        }
+        .emoji-line {
+            display: inline-grid;
+            justify-content: center;
+            line-height: 1.1;
+            font-size: clamp(10px, 3vw, 32px);
+            gap: 1px;
+        }
+        .emoji-line span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.2em;
+            height: 1.2em;
+        }
+        .emoji-line .off {
+            opacity: 0;
+        }
+
+        /* Sparkle animation on emoji cells */
+        @keyframes emojiPop {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        .sparkle {
+            animation: emojiPop 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Starfield -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Emoji pixel art -->
+    <div class="emoji-art">
+        <div class="emoji-line" id="line-high"></div>
+        <div style="height: clamp(6px, 1.5vw, 16px)"></div>
+        <div class="emoji-line" id="line-grader"></div>
+    </div>
+
+    <script>
+        // === LETTER DEFINITIONS (5 rows each) ===
+        const LETTERS = {
+            H: [
+                [1,0,0,1],
+                [1,0,0,1],
+                [1,1,1,1],
+                [1,0,0,1],
+                [1,0,0,1],
+            ],
+            I: [
+                [1,1,1],
+                [0,1,0],
+                [0,1,0],
+                [0,1,0],
+                [1,1,1],
+            ],
+            G: [
+                [0,1,1,1],
+                [1,0,0,0],
+                [1,0,1,1],
+                [1,0,0,1],
+                [0,1,1,0],
+            ],
+            R: [
+                [1,1,1,0],
+                [1,0,0,1],
+                [1,1,1,0],
+                [1,0,1,0],
+                [1,0,0,1],
+            ],
+            A: [
+                [0,1,1,0],
+                [1,0,0,1],
+                [1,1,1,1],
+                [1,0,0,1],
+                [1,0,0,1],
+            ],
+            D: [
+                [1,1,1,0],
+                [1,0,0,1],
+                [1,0,0,1],
+                [1,0,0,1],
+                [1,1,1,0],
+            ],
+            E: [
+                [1,1,1,1],
+                [1,0,0,0],
+                [1,1,1,0],
+                [1,0,0,0],
+                [1,1,1,1],
+            ],
+        };
+
+        // Mining & atmosphere emojis only
+        const EMOJIS = ['⛏️','⚒️','🪨','💎','🪙','💰','🧨','🕳️','⛰️','🔦','🛤️','💀'];
+
+        function randomEmoji() {
+            // ~60% mountain, ~40% everything else
+            if (Math.random() < 0.8) return '🪨';
+            const others = EMOJIS.filter(e => e !== '🪨');
+            return others[Math.floor(Math.random() * others.length)];
+        }
+
+        function buildWordGrid(word) {
+            const rows = 5;
+            const letterGrids = [];
+            for (const ch of word) {
+                letterGrids.push(LETTERS[ch]);
+            }
+
+            let totalCols = 0;
+            for (let i = 0; i < letterGrids.length; i++) {
+                totalCols += letterGrids[i][0].length;
+                if (i < letterGrids.length - 1) totalCols += 1;
+            }
+
+            const grid = [];
+            for (let r = 0; r < rows; r++) {
+                const row = [];
+                for (let i = 0; i < letterGrids.length; i++) {
+                    const letterRow = letterGrids[i][r];
+                    for (const cell of letterRow) {
+                        row.push(cell);
+                    }
+                    if (i < letterGrids.length - 1) {
+                        row.push(0);
+                    }
+                }
+                grid.push(row);
+            }
+
+            return { grid, totalCols };
+        }
+
+        function renderWord(containerId, word) {
+            const { grid, totalCols } = buildWordGrid(word);
+            const container = document.getElementById(containerId);
+            container.style.gridTemplateColumns = `repeat(${totalCols}, 1.2em)`;
+            container.style.gridTemplateRows = 'repeat(5, 1.2em)';
+
+            for (let r = 0; r < grid.length; r++) {
+                for (let c = 0; c < grid[r].length; c++) {
+                    const span = document.createElement('span');
+                    if (grid[r][c]) {
+                        span.textContent = randomEmoji();
+                        if (Math.random() < 0.15) {
+                            span.classList.add('sparkle');
+                            span.style.animationDelay = (Math.random() * 2).toFixed(1) + 's';
+                        }
+                    } else {
+                        span.classList.add('off');
+                    }
+                    container.appendChild(span);
+                }
+            }
+        }
+
+        renderWord('line-high', 'HIGH');
+        renderWord('line-grader', 'GRADER');
+
+        // === STARFIELD ===
+        (function createStars() {
+            const container = document.getElementById('stars');
+            const count = 80;
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                const size = Math.random() * 2 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = (Math.random() * 3).toFixed(1) + 's';
+                star.style.animationDuration = (2 + Math.random() * 3).toFixed(1) + 's';
+                container.appendChild(star);
+            }
+        })();
+    </script>
+</body>
+</html>
