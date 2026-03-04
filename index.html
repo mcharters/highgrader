@@ -72,6 +72,44 @@
             animation: emojiPop 2s ease-in-out infinite;
         }
 
+        /* NFB film easter-egg links */
+        .emoji-line a.film-link {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.2em;
+            height: 1.2em;
+            position: relative;
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+        .emoji-line a.film-link:hover {
+            filter: brightness(1.4) drop-shadow(0 0 4px gold);
+        }
+        .emoji-line a.film-link::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a2e;
+            color: #b08d57;
+            font-size: 11px;
+            font-family: monospace;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+        .emoji-line a.film-link:hover::after {
+            opacity: 1;
+        }
+
         /* === MINESWEEPER === */
         .ms-wrap {
             position: relative;
@@ -334,6 +372,91 @@
 
         renderWord('line-high', 'HIGH');
         renderWord('line-grader', 'GRADER');
+
+        // === NFB MINING FILM EASTER EGGS ===
+        (async function loadNfbFilms() {
+            try {
+                const CACHE_KEY = 'nfb_mining_films';
+                let films;
+
+                // Try sessionStorage cache first
+                const cached = sessionStorage.getItem(CACHE_KEY);
+                if (cached) {
+                    films = JSON.parse(cached);
+                } else {
+                    // Fetch first page to get total page count
+                    const firstResp = await fetch('https://publicapi.nfb.ca/api/v5/works?subject=mining&locale=en');
+                    const firstData = await firstResp.json();
+                    const totalPages = firstData.meta.pagination.pages;
+
+                    // Collect films from all pages in parallel
+                    const pagePromises = [];
+                    for (let p = 2; p <= totalPages; p++) {
+                        pagePromises.push(
+                            fetch(`https://publicapi.nfb.ca/api/v5/works?subject=mining&locale=en&page=${p}`)
+                                .then(r => r.json())
+                        );
+                    }
+                    const restPages = await Promise.all(pagePromises);
+
+                    films = [];
+                    for (const item of firstData.items) {
+                        if (item.availability && item.availability.resource_url) {
+                            films.push({ title: item.title, url: item.availability.resource_url });
+                        }
+                    }
+                    for (const pageData of restPages) {
+                        for (const item of pageData.items) {
+                            if (item.availability && item.availability.resource_url) {
+                                films.push({ title: item.title, url: item.availability.resource_url });
+                            }
+                        }
+                    }
+
+                    sessionStorage.setItem(CACHE_KEY, JSON.stringify(films));
+                }
+
+                if (films.length === 0) return;
+
+                // Find all non-rock emoji spans in the title
+                const containers = [
+                    document.getElementById('line-high'),
+                    document.getElementById('line-grader')
+                ];
+                const nonRockSpans = [];
+                for (const container of containers) {
+                    for (const span of container.children) {
+                        if (!span.classList.contains('off') && span.textContent !== '🪨') {
+                            nonRockSpans.push(span);
+                        }
+                    }
+                }
+
+                // Shuffle films and assign to non-rock emoji
+                const shuffled = films.sort(() => Math.random() - 0.5);
+                const count = Math.min(nonRockSpans.length, shuffled.length);
+                for (let i = 0; i < count; i++) {
+                    const span = nonRockSpans[i];
+                    const film = shuffled[i];
+                    const link = document.createElement('a');
+                    link.href = film.url;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    link.title = film.title;
+                    link.className = 'film-link';
+                    // Preserve sparkle class
+                    if (span.classList.contains('sparkle')) {
+                        link.classList.add('sparkle');
+                        link.style.animationDelay = span.style.animationDelay;
+                    }
+                    link.textContent = span.textContent;
+                    span.replaceWith(link);
+                }
+            } catch (e) {
+                // Silent fail — easter eggs are non-critical
+                console.log('Failed to load NFB films:', e);
+            }
+        })();
 
         // === STARFIELD ===
         (function createStars() {
