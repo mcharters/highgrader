@@ -1,7 +1,0 @@
-{
-  "name": "highgrader",
-  "private": true,
-  "scripts": {
-    "start": "npx serve ."
-  }
-}
