@@ -7,6 +7,8 @@ permalink: /about/
 
 # 🎸 About the Band
 
+<img src="{{ '/assets/images/band.jpg' | relative_url }}" alt="High Grader band photo">
+
 HIGH GRADER is... *(tell the world who you are here)*.
 
 ## The Crew
