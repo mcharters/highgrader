@@ -1,700 +1,238 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⛏️ HIGH GRADER ⛏️</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background: #0d0d1a;
-            text-align: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding-top: 5vh;
-        }
-
-        /* Starfield background */
-        .stars {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-        .star {
-            position: absolute;
-            background: #fff;
-            border-radius: 50%;
-            animation: twinkle 3s ease-in-out infinite alternate;
-        }
-        @keyframes twinkle {
-            0% { opacity: 0.2; }
-            100% { opacity: 1; }
-        }
-
-        /* Emoji art container */
-        .emoji-art {
-            position: relative;
-            z-index: 1;
-            user-select: none;
-            padding: 20px 10px;
-        }
-        .emoji-line {
-            display: inline-grid;
-            justify-content: center;
-            line-height: 1.1;
-            font-size: clamp(8px, 2.5vw, 32px);
-            gap: 1px;
-        }
-        .emoji-line span {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 1.2em;
-            height: 1.2em;
-        }
-        .emoji-line .off {
-            opacity: 0;
-        }
-
-        /* Sparkle animation on emoji cells */
-        @keyframes emojiPop {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-        .sparkle {
-            animation: emojiPop 2s ease-in-out infinite;
-        }
-
-        /* NFB film easter-egg links */
-        .emoji-line a.film-link {
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 1.2em;
-            height: 1.2em;
-            position: relative;
-            cursor: pointer;
-            transition: filter 0.2s;
-        }
-        .emoji-line a.film-link:hover {
-            filter: brightness(1.4) drop-shadow(0 0 4px gold);
-        }
-        .emoji-line a.film-link::after {
-            content: attr(title);
-            position: absolute;
-            bottom: 120%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1a1a2e;
-            color: #b08d57;
-            font-size: 11px;
-            font-family: monospace;
-            padding: 3px 8px;
-            border-radius: 4px;
-            border: 1px solid #444;
-            white-space: nowrap;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s;
-            z-index: 10;
-        }
-        .emoji-line a.film-link:hover::after {
-            opacity: 1;
-        }
-
-        /* === MINESWEEPER === */
-        .ms-wrap {
-            position: relative;
-            z-index: 1;
-            margin-top: 30px;
-            padding-bottom: 40px;
-        }
-        .ms-container {
-            display: inline-block;
-            background: #1a1a2e;
-            border: 2px solid #333;
-            border-radius: 8px;
-            padding: 10px;
-        }
-        .ms-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            gap: 8px;
-        }
-        .ms-counter {
-            font-family: monospace;
-            font-size: clamp(16px, 4vw, 24px);
-            color: #ff4444;
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 4px;
-            padding: 2px 8px;
-            min-width: 50px;
-            text-align: center;
-        }
-        .ms-reset {
-            font-size: clamp(20px, 5vw, 32px);
-            cursor: pointer;
-            background: none;
-            border: 2px solid #444;
-            border-radius: 6px;
-            padding: 2px 8px;
-            line-height: 1;
-            transition: transform 0.1s;
-        }
-        .ms-reset:hover { transform: scale(1.1); }
-        .ms-reset:active { transform: scale(0.95); }
-        .ms-flag-toggle {
-            font-size: clamp(16px, 4vw, 24px);
-            cursor: pointer;
-            background: none;
-            border: 2px solid #444;
-            border-radius: 6px;
-            padding: 2px 8px;
-            line-height: 1;
-            transition: background 0.15s;
-        }
-        .ms-flag-toggle.active {
-            background: rgba(255, 68, 68, 0.3);
-            border-color: #ff4444;
-        }
-        .ms-grid {
-            display: grid;
-            gap: 1px;
-            touch-action: manipulation;
-            user-select: none;
-        }
-        .ms-cell {
-            width: clamp(28px, 8vw, 38px);
-            height: clamp(28px, 8vw, 38px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: clamp(14px, 3.5vw, 20px);
-            font-family: monospace;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 3px;
-            transition: background 0.1s;
-        }
-        .ms-cell.hidden {
-            background: #2a2a4a;
-            border: 1px solid #444;
-            box-shadow: inset 1px 1px 0 #3a3a5a, inset -1px -1px 0 #1a1a3a;
-        }
-        .ms-cell.hidden:hover {
-            background: #3a3a5a;
-        }
-        .ms-cell.revealed {
-            background: #16162e;
-            border: 1px solid #222;
-        }
-        .ms-cell.flagged {
-            background: #2a2a4a;
-            border: 1px solid #444;
-            box-shadow: inset 1px 1px 0 #3a3a5a, inset -1px -1px 0 #1a1a3a;
-        }
-        .ms-cell.mine {
-            background: #4a1a1a;
-        }
-        .ms-cell.mine-hit {
-            background: #8a2222;
-        }
-        .ms-cell .n1 { color: #6699ff; }
-        .ms-cell .n2 { color: #44bb44; }
-        .ms-cell .n3 { color: #ff4444; }
-        .ms-cell .n4 { color: #9944cc; }
-        .ms-cell .n5 { color: #cc6622; }
-        .ms-cell .n6 { color: #44cccc; }
-        .ms-cell .n7 { color: #cccccc; }
-        .ms-cell .n8 { color: #888888; }
-        .ms-message {
-            font-family: monospace;
-            color: #b08d57;
-            font-size: clamp(12px, 2.5vw, 16px);
-            margin-top: 8px;
-            min-height: 1.4em;
-        }
-    </style>
-</head>
-<body>
-    <!-- Starfield -->
-    <div class="stars" id="stars"></div>
-
-    <!-- Emoji pixel art -->
-    <div class="emoji-art">
-        <div class="emoji-line" id="line-high"></div>
-        <div style="height: clamp(6px, 1.5vw, 16px)"></div>
-        <div class="emoji-line" id="line-grader"></div>
-    </div>
-
-    <!-- Minesweeper Game -->
-    <div class="ms-wrap">
-        <div class="ms-container">
-            <div class="ms-header">
-                <div class="ms-counter" id="ms-mines">010</div>
-                <button class="ms-flag-toggle" id="ms-flag-btn" title="Toggle flag mode (for mobile)">🚩</button>
-                <button class="ms-reset" id="ms-reset">⛏️</button>
-                <div class="ms-counter" id="ms-timer">000</div>
-            </div>
-            <div class="ms-grid" id="ms-grid"></div>
-            <div class="ms-message" id="ms-message"></div>
+---
+layout: default
+---
+<!-- Minesweeper Game -->
+<div class="ms-wrap">
+    <div class="ms-container">
+        <div class="ms-header">
+            <div class="ms-counter" id="ms-mines">010</div>
+            <button class="ms-flag-toggle" id="ms-flag-btn" title="Toggle flag mode (for mobile)">🚩</button>
+            <button class="ms-reset" id="ms-reset">⛏️</button>
+            <div class="ms-counter" id="ms-timer">000</div>
         </div>
+        <div class="ms-grid" id="ms-grid"></div>
+        <div class="ms-message" id="ms-message"></div>
     </div>
+</div>
 
-    <script>
-        // === LETTER DEFINITIONS (5 rows each) ===
-        const LETTERS = {
-            H: [
-                [1,0,0,1],
-                [1,0,0,1],
-                [1,1,1,1],
-                [1,0,0,1],
-                [1,0,0,1],
-            ],
-            I: [
-                [1,1,1],
-                [0,1,0],
-                [0,1,0],
-                [0,1,0],
-                [1,1,1],
-            ],
-            G: [
-                [0,1,1,1],
-                [1,0,0,0],
-                [1,0,1,1],
-                [1,0,0,1],
-                [0,1,1,0],
-            ],
-            R: [
-                [1,1,1,0],
-                [1,0,0,1],
-                [1,1,1,0],
-                [1,0,1,0],
-                [1,0,0,1],
-            ],
-            A: [
-                [0,1,1,0],
-                [1,0,0,1],
-                [1,1,1,1],
-                [1,0,0,1],
-                [1,0,0,1],
-            ],
-            D: [
-                [1,1,1,0],
-                [1,0,0,1],
-                [1,0,0,1],
-                [1,0,0,1],
-                [1,1,1,0],
-            ],
-            E: [
-                [1,1,1,1],
-                [1,0,0,0],
-                [1,1,1,0],
-                [1,0,0,0],
-                [1,1,1,1],
-            ],
-        };
+<script>
+    // === MINESWEEPER ===
+    (function() {
+        const ROWS = 9, COLS = 9, MINES = 10;
+        let board, revealed, flagged, mineMap, gameOver, gameWon, firstClick, flagCount, timerVal, timerInterval;
+        let flagMode = false;
 
-        // Mining & atmosphere emojis only
-        const EMOJIS = ['⛏️','⚒️','🪨','💎','🪙','💰','🧨','🕳️','⛰️','🔦','🛤️','💀'];
+        const gridEl = document.getElementById('ms-grid');
+        const minesEl = document.getElementById('ms-mines');
+        const timerEl = document.getElementById('ms-timer');
+        const resetEl = document.getElementById('ms-reset');
+        const messageEl = document.getElementById('ms-message');
+        const flagBtn = document.getElementById('ms-flag-btn');
 
-        function randomEmoji() {
-            // ~60% mountain, ~40% everything else
-            if (Math.random() < 0.8) return '🪨';
-            const others = EMOJIS.filter(e => e !== '🪨');
-            return others[Math.floor(Math.random() * others.length)];
+        gridEl.style.gridTemplateColumns = `repeat(${COLS}, clamp(28px, 8vw, 38px))`;
+
+        function init() {
+            board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+            revealed = Array.from({length: ROWS}, () => Array(COLS).fill(false));
+            flagged = Array.from({length: ROWS}, () => Array(COLS).fill(false));
+            mineMap = Array.from({length: ROWS}, () => Array(COLS).fill(false));
+            gameOver = false;
+            gameWon = false;
+            firstClick = true;
+            flagCount = 0;
+            timerVal = 0;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            resetEl.textContent = '⛏️';
+            messageEl.textContent = '';
+            flagMode = false;
+            flagBtn.classList.remove('active');
+            updateCounters();
+            render();
         }
 
-        function buildWordGrid(word) {
-            const rows = 5;
-            const letterGrids = [];
-            for (const ch of word) {
-                letterGrids.push(LETTERS[ch]);
+        function placeMines(safeR, safeC) {
+            let placed = 0;
+            while (placed < MINES) {
+                const r = Math.floor(Math.random() * ROWS);
+                const c = Math.floor(Math.random() * COLS);
+                if (mineMap[r][c]) continue;
+                if (Math.abs(r - safeR) <= 1 && Math.abs(c - safeC) <= 1) continue;
+                mineMap[r][c] = true;
+                placed++;
             }
-
-            let totalCols = 0;
-            for (let i = 0; i < letterGrids.length; i++) {
-                totalCols += letterGrids[i][0].length;
-                if (i < letterGrids.length - 1) totalCols += 1;
-            }
-
-            const grid = [];
-            for (let r = 0; r < rows; r++) {
-                const row = [];
-                for (let i = 0; i < letterGrids.length; i++) {
-                    const letterRow = letterGrids[i][r];
-                    for (const cell of letterRow) {
-                        row.push(cell);
-                    }
-                    if (i < letterGrids.length - 1) {
-                        row.push(0);
-                    }
-                }
-                grid.push(row);
-            }
-
-            return { grid, totalCols };
-        }
-
-        function renderWord(containerId, word) {
-            const { grid, totalCols } = buildWordGrid(word);
-            const container = document.getElementById(containerId);
-            container.style.gridTemplateColumns = `repeat(${totalCols}, 1.2em)`;
-            container.style.gridTemplateRows = 'repeat(5, 1.2em)';
-
-            for (let r = 0; r < grid.length; r++) {
-                for (let c = 0; c < grid[r].length; c++) {
-                    const span = document.createElement('span');
-                    if (grid[r][c]) {
-                        span.textContent = randomEmoji();
-                        if (Math.random() < 0.15) {
-                            span.classList.add('sparkle');
-                            span.style.animationDelay = (Math.random() * 2).toFixed(1) + 's';
-                        }
-                    } else {
-                        span.classList.add('off');
-                    }
-                    container.appendChild(span);
-                }
-            }
-        }
-
-        renderWord('line-high', 'HIGH');
-        renderWord('line-grader', 'GRADER');
-
-        // === NFB MINING FILM EASTER EGGS ===
-        (async function loadNfbFilms() {
-            try {
-                const CACHE_KEY = 'nfb_mining_films';
-                let films;
-
-                // Try sessionStorage cache first
-                const cached = sessionStorage.getItem(CACHE_KEY);
-                if (cached) {
-                    films = JSON.parse(cached);
-                } else {
-                    // Fetch first page to get total page count
-                    const firstResp = await fetch('https://publicapi.nfb.ca/api/v5/works?subject=mining&locale=en');
-                    const firstData = await firstResp.json();
-                    const totalPages = firstData.meta.pagination.pages;
-
-                    // Collect films from all pages in parallel
-                    const pagePromises = [];
-                    for (let p = 2; p <= totalPages; p++) {
-                        pagePromises.push(
-                            fetch(`https://publicapi.nfb.ca/api/v5/works?subject=mining&locale=en&page=${p}`)
-                                .then(r => r.json())
-                        );
-                    }
-                    const restPages = await Promise.all(pagePromises);
-
-                    films = [];
-                    for (const item of firstData.items) {
-                        if (item.availability && item.availability.resource_url) {
-                            films.push({ title: item.title, url: item.availability.resource_url });
-                        }
-                    }
-                    for (const pageData of restPages) {
-                        for (const item of pageData.items) {
-                            if (item.availability && item.availability.resource_url) {
-                                films.push({ title: item.title, url: item.availability.resource_url });
-                            }
-                        }
-                    }
-
-                    sessionStorage.setItem(CACHE_KEY, JSON.stringify(films));
-                }
-
-                if (films.length === 0) return;
-
-                // Find all non-rock emoji spans in the title
-                const containers = [
-                    document.getElementById('line-high'),
-                    document.getElementById('line-grader')
-                ];
-                const nonRockSpans = [];
-                for (const container of containers) {
-                    for (const span of container.children) {
-                        if (!span.classList.contains('off') && span.textContent !== '🪨') {
-                            nonRockSpans.push(span);
-                        }
-                    }
-                }
-
-                // Shuffle films and assign to non-rock emoji
-                const shuffled = films.sort(() => Math.random() - 0.5);
-                const count = Math.min(nonRockSpans.length, shuffled.length);
-                for (let i = 0; i < count; i++) {
-                    const span = nonRockSpans[i];
-                    const film = shuffled[i];
-                    const link = document.createElement('a');
-                    link.href = film.url;
-                    link.target = '_blank';
-                    link.rel = 'noopener noreferrer';
-                    link.title = film.title;
-                    link.className = 'film-link';
-                    // Preserve sparkle class
-                    if (span.classList.contains('sparkle')) {
-                        link.classList.add('sparkle');
-                        link.style.animationDelay = span.style.animationDelay;
-                    }
-                    link.textContent = span.textContent;
-                    span.replaceWith(link);
-                }
-            } catch (e) {
-                // Silent fail — easter eggs are non-critical
-                console.log('Failed to load NFB films:', e);
-            }
-        })();
-
-        // === STARFIELD ===
-        (function createStars() {
-            const container = document.getElementById('stars');
-            const count = 80;
-            for (let i = 0; i < count; i++) {
-                const star = document.createElement('div');
-                star.classList.add('star');
-                const size = Math.random() * 2 + 1;
-                star.style.width = size + 'px';
-                star.style.height = size + 'px';
-                star.style.left = Math.random() * 100 + '%';
-                star.style.top = Math.random() * 100 + '%';
-                star.style.animationDelay = (Math.random() * 3).toFixed(1) + 's';
-                star.style.animationDuration = (2 + Math.random() * 3).toFixed(1) + 's';
-                container.appendChild(star);
-            }
-        })();
-
-        // === MINESWEEPER ===
-        (function() {
-            const ROWS = 9, COLS = 9, MINES = 10;
-            let board, revealed, flagged, mineMap, gameOver, gameWon, firstClick, flagCount, timerVal, timerInterval;
-            let flagMode = false;
-
-            const gridEl = document.getElementById('ms-grid');
-            const minesEl = document.getElementById('ms-mines');
-            const timerEl = document.getElementById('ms-timer');
-            const resetEl = document.getElementById('ms-reset');
-            const messageEl = document.getElementById('ms-message');
-            const flagBtn = document.getElementById('ms-flag-btn');
-
-            gridEl.style.gridTemplateColumns = `repeat(${COLS}, clamp(28px, 8vw, 38px))`;
-
-            function init() {
-                board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
-                revealed = Array.from({length: ROWS}, () => Array(COLS).fill(false));
-                flagged = Array.from({length: ROWS}, () => Array(COLS).fill(false));
-                mineMap = Array.from({length: ROWS}, () => Array(COLS).fill(false));
-                gameOver = false;
-                gameWon = false;
-                firstClick = true;
-                flagCount = 0;
-                timerVal = 0;
-                clearInterval(timerInterval);
-                timerInterval = null;
-                resetEl.textContent = '⛏️';
-                messageEl.textContent = '';
-                flagMode = false;
-                flagBtn.classList.remove('active');
-                updateCounters();
-                render();
-            }
-
-            function placeMines(safeR, safeC) {
-                let placed = 0;
-                while (placed < MINES) {
-                    const r = Math.floor(Math.random() * ROWS);
-                    const c = Math.floor(Math.random() * COLS);
-                    if (mineMap[r][c]) continue;
-                    if (Math.abs(r - safeR) <= 1 && Math.abs(c - safeC) <= 1) continue;
-                    mineMap[r][c] = true;
-                    placed++;
-                }
-                // Calculate adjacency numbers
-                for (let r = 0; r < ROWS; r++) {
-                    for (let c = 0; c < COLS; c++) {
-                        if (mineMap[r][c]) { board[r][c] = -1; continue; }
-                        let count = 0;
-                        for (let dr = -1; dr <= 1; dr++) {
-                            for (let dc = -1; dc <= 1; dc++) {
-                                const nr = r + dr, nc = c + dc;
-                                if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && mineMap[nr][nc]) count++;
-                            }
-                        }
-                        board[r][c] = count;
-                    }
-                }
-            }
-
-            function startTimer() {
-                if (timerInterval) return;
-                timerInterval = setInterval(() => {
-                    timerVal = Math.min(999, timerVal + 1);
-                    timerEl.textContent = String(timerVal).padStart(3, '0');
-                }, 1000);
-            }
-
-            function updateCounters() {
-                minesEl.textContent = String(Math.max(0, MINES - flagCount)).padStart(3, '0');
-                timerEl.textContent = String(timerVal).padStart(3, '0');
-            }
-
-            function revealCell(r, c) {
-                if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return;
-                if (revealed[r][c] || flagged[r][c]) return;
-                revealed[r][c] = true;
-
-                if (board[r][c] === 0) {
+            // Calculate adjacency numbers
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (mineMap[r][c]) { board[r][c] = -1; continue; }
+                    let count = 0;
                     for (let dr = -1; dr <= 1; dr++) {
                         for (let dc = -1; dc <= 1; dc++) {
-                            if (dr === 0 && dc === 0) continue;
-                            revealCell(r + dr, c + dc);
+                            const nr = r + dr, nc = c + dc;
+                            if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && mineMap[nr][nc]) count++;
                         }
+                    }
+                    board[r][c] = count;
+                }
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval) return;
+            timerInterval = setInterval(() => {
+                timerVal = Math.min(999, timerVal + 1);
+                timerEl.textContent = String(timerVal).padStart(3, '0');
+            }, 1000);
+        }
+
+        function updateCounters() {
+            minesEl.textContent = String(Math.max(0, MINES - flagCount)).padStart(3, '0');
+            timerEl.textContent = String(timerVal).padStart(3, '0');
+        }
+
+        function revealCell(r, c) {
+            if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return;
+            if (revealed[r][c] || flagged[r][c]) return;
+            revealed[r][c] = true;
+
+            if (board[r][c] === 0) {
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        if (dr === 0 && dc === 0) continue;
+                        revealCell(r + dr, c + dc);
                     }
                 }
             }
+        }
 
-            function checkWin() {
-                let unrevealed = 0;
-                for (let r = 0; r < ROWS; r++) {
-                    for (let c = 0; c < COLS; c++) {
-                        if (!revealed[r][c]) unrevealed++;
-                    }
-                }
-                if (unrevealed === MINES) {
-                    gameWon = true;
-                    gameOver = true;
-                    clearInterval(timerInterval);
-                    resetEl.textContent = '💎';
-                    messageEl.textContent = '💎 YOU STRUCK GOLD! 💎';
-                    // Auto-flag remaining mines
-                    for (let r = 0; r < ROWS; r++) {
-                        for (let c = 0; c < COLS; c++) {
-                            if (!revealed[r][c]) flagged[r][c] = true;
-                        }
-                    }
-                    flagCount = MINES;
-                    updateCounters();
-                    render();
+        function checkWin() {
+            let unrevealed = 0;
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (!revealed[r][c]) unrevealed++;
                 }
             }
-
-            function handleLoss(hitR, hitC) {
+            if (unrevealed === MINES) {
+                gameWon = true;
                 gameOver = true;
                 clearInterval(timerInterval);
-                resetEl.textContent = '💀';
-                messageEl.textContent = '🧨 CAVE IN! 🧨';
-                // Reveal all mines
+                resetEl.textContent = '💎';
+                messageEl.textContent = '💎 YOU STRUCK GOLD! 💎';
+                // Auto-flag remaining mines
                 for (let r = 0; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) {
-                        if (mineMap[r][c]) revealed[r][c] = true;
+                        if (!revealed[r][c]) flagged[r][c] = true;
                     }
                 }
-                render();
-                // Highlight the mine that was clicked
-                const hitCell = gridEl.children[hitR * COLS + hitC];
-                if (hitCell) hitCell.classList.add('mine-hit');
-            }
-
-            function handleClick(r, c) {
-                if (gameOver) return;
-                if (revealed[r][c] || flagged[r][c]) return;
-
-                if (firstClick) {
-                    firstClick = false;
-                    placeMines(r, c);
-                    startTimer();
-                }
-
-                if (mineMap[r][c]) {
-                    handleLoss(r, c);
-                    return;
-                }
-
-                revealCell(r, c);
-                checkWin();
-                render();
-            }
-
-            function handleFlag(r, c) {
-                if (gameOver) return;
-                if (revealed[r][c]) return;
-
-                flagged[r][c] = !flagged[r][c];
-                flagCount += flagged[r][c] ? 1 : -1;
+                flagCount = MINES;
                 updateCounters();
                 render();
             }
+        }
 
-            function render() {
-                gridEl.innerHTML = '';
-                for (let r = 0; r < ROWS; r++) {
-                    for (let c = 0; c < COLS; c++) {
-                        const cell = document.createElement('div');
-                        cell.classList.add('ms-cell');
-
-                        if (revealed[r][c]) {
-                            cell.classList.add('revealed');
-                            if (mineMap[r][c]) {
-                                cell.classList.add('mine');
-                                cell.textContent = '🧨';
-                            } else if (board[r][c] > 0) {
-                                const num = document.createElement('span');
-                                num.className = 'n' + board[r][c];
-                                num.textContent = board[r][c];
-                                cell.appendChild(num);
-                            }
-                        } else if (flagged[r][c]) {
-                            cell.classList.add('flagged');
-                            cell.textContent = '🚩';
-                        } else {
-                            cell.classList.add('hidden');
-                        }
-
-                        // Desktop: left click = reveal, right click = flag
-                        cell.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            if (flagMode) {
-                                handleFlag(r, c);
-                            } else {
-                                handleClick(r, c);
-                            }
-                        });
-                        cell.addEventListener('contextmenu', (e) => {
-                            e.preventDefault();
-                            handleFlag(r, c);
-                        });
-
-                        gridEl.appendChild(cell);
-                    }
+        function handleLoss(hitR, hitC) {
+            gameOver = true;
+            clearInterval(timerInterval);
+            resetEl.textContent = '💀';
+            messageEl.textContent = '🧨 CAVE IN! 🧨';
+            // Reveal all mines
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (mineMap[r][c]) revealed[r][c] = true;
                 }
             }
+            render();
+            // Highlight the mine that was clicked
+            const hitCell = gridEl.children[hitR * COLS + hitC];
+            if (hitCell) hitCell.classList.add('mine-hit');
+        }
 
-            // Flag mode toggle (for mobile)
-            flagBtn.addEventListener('click', () => {
-                flagMode = !flagMode;
-                flagBtn.classList.toggle('active', flagMode);
-            });
+        function handleClick(r, c) {
+            if (gameOver) return;
+            if (revealed[r][c] || flagged[r][c]) return;
 
-            // Reset button
-            resetEl.addEventListener('click', init);
+            if (firstClick) {
+                firstClick = false;
+                placeMines(r, c);
+                startTimer();
+            }
 
-            // Prevent context menu on the grid
-            gridEl.addEventListener('contextmenu', (e) => e.preventDefault());
+            if (mineMap[r][c]) {
+                handleLoss(r, c);
+                return;
+            }
 
-            init();
-        })();
-    </script>
-</body>
-</html>
+            revealCell(r, c);
+            checkWin();
+            render();
+        }
+
+        function handleFlag(r, c) {
+            if (gameOver) return;
+            if (revealed[r][c]) return;
+
+            flagged[r][c] = !flagged[r][c];
+            flagCount += flagged[r][c] ? 1 : -1;
+            updateCounters();
+            render();
+        }
+
+        function render() {
+            gridEl.innerHTML = '';
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('ms-cell');
+
+                    if (revealed[r][c]) {
+                        cell.classList.add('revealed');
+                        if (mineMap[r][c]) {
+                            cell.classList.add('mine');
+                            cell.textContent = '🧨';
+                        } else if (board[r][c] > 0) {
+                            const num = document.createElement('span');
+                            num.className = 'n' + board[r][c];
+                            num.textContent = board[r][c];
+                            cell.appendChild(num);
+                        }
+                    } else if (flagged[r][c]) {
+                        cell.classList.add('flagged');
+                        cell.textContent = '🚩';
+                    } else {
+                        cell.classList.add('hidden');
+                    }
+
+                    // Desktop: left click = reveal, right click = flag
+                    cell.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (flagMode) {
+                            handleFlag(r, c);
+                        } else {
+                            handleClick(r, c);
+                        }
+                    });
+                    cell.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        handleFlag(r, c);
+                    });
+
+                    gridEl.appendChild(cell);
+                }
+            }
+        }
+
+        // Flag mode toggle (for mobile)
+        flagBtn.addEventListener('click', () => {
+            flagMode = !flagMode;
+            flagBtn.classList.toggle('active', flagMode);
+        });
+
+        // Reset button
+        resetEl.addEventListener('click', init);
+
+        // Prevent context menu on the grid
+        gridEl.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        init();
+    })();
+</script>

@@ -1,0 +1,215 @@
+<!-- Emoji pixel art title -->
+<a href="{{ '/' | relative_url }}" style="text-decoration: none; color: inherit;">
+<div class="emoji-art">
+    <div class="emoji-line" id="line-high"></div>
+    <div style="height: clamp(6px, 1.5vw, 16px)"></div>
+    <div class="emoji-line" id="line-grader"></div>
+</div>
+</a>
+
+<script>
+    // === LETTER DEFINITIONS (5 rows each) ===
+    const LETTERS = {
+        H: [
+            [1,0,0,1],
+            [1,0,0,1],
+            [1,1,1,1],
+            [1,0,0,1],
+            [1,0,0,1],
+        ],
+        I: [
+            [1,1,1],
+            [0,1,0],
+            [0,1,0],
+            [0,1,0],
+            [1,1,1],
+        ],
+        G: [
+            [0,1,1,1],
+            [1,0,0,0],
+            [1,0,1,1],
+            [1,0,0,1],
+            [0,1,1,0],
+        ],
+        R: [
+            [1,1,1,0],
+            [1,0,0,1],
+            [1,1,1,0],
+            [1,0,1,0],
+            [1,0,0,1],
+        ],
+        A: [
+            [0,1,1,0],
+            [1,0,0,1],
+            [1,1,1,1],
+            [1,0,0,1],
+            [1,0,0,1],
+        ],
+        D: [
+            [1,1,1,0],
+            [1,0,0,1],
+            [1,0,0,1],
+            [1,0,0,1],
+            [1,1,1,0],
+        ],
+        E: [
+            [1,1,1,1],
+            [1,0,0,0],
+            [1,1,1,0],
+            [1,0,0,0],
+            [1,1,1,1],
+        ],
+    };
+
+    // Mining & atmosphere emojis only
+    const EMOJIS = ['⛏️','⚒️','🪨','💎','🪙','💰','🧨','🕳️','⛰️','🔦','🛤️','💀'];
+
+    function randomEmoji() {
+        // ~60% mountain, ~40% everything else
+        if (Math.random() < 0.8) return '🪨';
+        const others = EMOJIS.filter(e => e !== '🪨');
+        return others[Math.floor(Math.random() * others.length)];
+    }
+
+    function buildWordGrid(word) {
+        const rows = 5;
+        const letterGrids = [];
+        for (const ch of word) {
+            letterGrids.push(LETTERS[ch]);
+        }
+
+        let totalCols = 0;
+        for (let i = 0; i < letterGrids.length; i++) {
+            totalCols += letterGrids[i][0].length;
+            if (i < letterGrids.length - 1) totalCols += 1;
+        }
+
+        const grid = [];
+        for (let r = 0; r < rows; r++) {
+            const row = [];
+            for (let i = 0; i < letterGrids.length; i++) {
+                const letterRow = letterGrids[i][r];
+                for (const cell of letterRow) {
+                    row.push(cell);
+                }
+                if (i < letterGrids.length - 1) {
+                    row.push(0);
+                }
+            }
+            grid.push(row);
+        }
+
+        return { grid, totalCols };
+    }
+
+    function renderWord(containerId, word) {
+        const { grid, totalCols } = buildWordGrid(word);
+        const container = document.getElementById(containerId);
+        container.style.gridTemplateColumns = `repeat(${totalCols}, 1.2em)`;
+        container.style.gridTemplateRows = 'repeat(5, 1.2em)';
+
+        for (let r = 0; r < grid.length; r++) {
+            for (let c = 0; c < grid[r].length; c++) {
+                const span = document.createElement('span');
+                if (grid[r][c]) {
+                    span.textContent = randomEmoji();
+                    if (Math.random() < 0.15) {
+                        span.classList.add('sparkle');
+                        span.style.animationDelay = (Math.random() * 2).toFixed(1) + 's';
+                    }
+                } else {
+                    span.classList.add('off');
+                }
+                container.appendChild(span);
+            }
+        }
+    }
+
+    renderWord('line-high', 'HIGH');
+    renderWord('line-grader', 'GRADER');
+
+    // === NFB MINING FILM EASTER EGGS ===
+    (async function loadNfbFilms() {
+        try {
+            const CACHE_KEY = 'nfb_mining_films';
+            let films;
+
+            // Try sessionStorage cache first
+            const cached = sessionStorage.getItem(CACHE_KEY);
+            if (cached) {
+                films = JSON.parse(cached);
+            } else {
+                // Fetch first page to get total page count
+                const firstResp = await fetch('https://publicapi.nfb.ca/api/v5/works?subject=mining&locale=en');
+                const firstData = await firstResp.json();
+                const totalPages = firstData.meta.pagination.pages;
+
+                // Collect films from all pages in parallel
+                const pagePromises = [];
+                for (let p = 2; p <= totalPages; p++) {
+                    pagePromises.push(
+                        fetch(`https://publicapi.nfb.ca/api/v5/works?subject=mining&locale=en&page=${p}`)
+                            .then(r => r.json())
+                    );
+                }
+                const restPages = await Promise.all(pagePromises);
+
+                films = [];
+                for (const item of firstData.items) {
+                    if (item.availability && item.availability.resource_url) {
+                        films.push({ title: item.title, url: item.availability.resource_url });
+                    }
+                }
+                for (const pageData of restPages) {
+                    for (const item of pageData.items) {
+                        if (item.availability && item.availability.resource_url) {
+                            films.push({ title: item.title, url: item.availability.resource_url });
+                        }
+                    }
+                }
+
+                sessionStorage.setItem(CACHE_KEY, JSON.stringify(films));
+            }
+
+            if (films.length === 0) return;
+
+            // Find all non-rock emoji spans in the title
+            const containers = [
+                document.getElementById('line-high'),
+                document.getElementById('line-grader')
+            ];
+            const nonRockSpans = [];
+            for (const container of containers) {
+                for (const span of container.children) {
+                    if (!span.classList.contains('off') && span.textContent !== '🪨') {
+                        nonRockSpans.push(span);
+                    }
+                }
+            }
+
+            // Shuffle films and assign to non-rock emoji
+            const shuffled = films.sort(() => Math.random() - 0.5);
+            const count = Math.min(nonRockSpans.length, shuffled.length);
+            for (let i = 0; i < count; i++) {
+                const span = nonRockSpans[i];
+                const film = shuffled[i];
+                const link = document.createElement('a');
+                link.href = film.url;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.title = film.title;
+                link.className = 'film-link';
+                // Preserve sparkle class
+                if (span.classList.contains('sparkle')) {
+                    link.classList.add('sparkle');
+                    link.style.animationDelay = span.style.animationDelay;
+                }
+                link.textContent = span.textContent;
+                span.replaceWith(link);
+            }
+        } catch (e) {
+            // Silent fail — easter eggs are non-critical
+            console.log('Failed to load NFB films:', e);
+        }
+    })();
+</script>
