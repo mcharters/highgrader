@@ -171,6 +171,76 @@
             box-shadow: 0 0 12px rgba(176, 141, 87, 0.2);
         }
 
+        /* Shows list */
+        .show-list {
+            list-style: none;
+            padding: 0;
+            margin: 1em 0 2em;
+        }
+        .show-list .show {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 6px;
+            transition: border-color 0.15s;
+        }
+        .show-list .show:hover { border-color: #b08d57; }
+        .show-list .show-date {
+            flex: 0 0 auto;
+            min-width: 120px;
+            color: #b08d57;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+        .show-list .show-main {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .show-list .show-venue {
+            color: #fff;
+            font-weight: bold;
+        }
+        .show-list .show-city {
+            color: #a0a0b8;
+            font-size: 0.9em;
+        }
+        .show-list .show-notes {
+            color: #888;
+            font-size: 0.85em;
+            font-style: italic;
+            margin-top: 2px;
+        }
+        .show-list .show-tickets {
+            flex: 0 0 auto;
+            padding: 6px 12px;
+            border: 1px solid #b08d57;
+            border-radius: 4px;
+            color: #b08d57;
+            text-decoration: none;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+        .show-list .show-tickets:hover {
+            background: #b08d57;
+            color: #0d0d1a;
+        }
+        .show-list.past .show {
+            opacity: 0.65;
+        }
+        @media (max-width: 600px) {
+            .show-list .show {
+                flex-wrap: wrap;
+            }
+            .show-list .show-date {
+                flex: 1 1 100%;
+                min-width: 0;
+            }
+        }
+
         /* About page: image beside text, stacks on narrow screens */
         .about-flex {
             display: flex;

@@ -1,4 +1,5 @@
 <nav class="site-nav">
     <a href="{{ '/' | relative_url }}"{% if page.url == '/' %} class="active"{% endif %}>⛏️ home</a>
+    <a href="{{ '/shows/' | relative_url }}"{% if page.url contains '/shows' %} class="active"{% endif %}>🎤 shows</a>
     <a href="{{ '/about/' | relative_url }}"{% if page.url contains '/about' %} class="active"{% endif %}>🎸 about</a>
 </nav>

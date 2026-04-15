@@ -1,0 +1,7 @@
+# Add shows here. Newest or oldest order doesn't matter — the page sorts them.
+# Required: date (YYYY-MM-DD), venue, city
+# Optional: tickets (URL), notes (free text)
+
+- date: 2026-05-16
+  venue: Yes Indeedy (I Do) Music Fest
+  city: Sackville, NB
