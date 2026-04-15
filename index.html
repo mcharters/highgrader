@@ -15,6 +15,16 @@ layout: default
     </div>
 </div>
 
+<!-- Win reward modal -->
+<div class="reward-modal" id="reward-modal" hidden>
+    <div class="reward-backdrop" id="reward-backdrop"></div>
+    <div class="reward-content">
+        <button class="reward-close" id="reward-close" aria-label="Close">✕</button>
+        <div class="reward-title">💎 YOU STRUCK GOLD! 💎</div>
+        <div class="reward-video-wrap" id="reward-video-wrap"></div>
+    </div>
+</div>
+
 <script>
     // === MINESWEEPER ===
     (function() {
@@ -28,8 +38,34 @@ layout: default
         const resetEl = document.getElementById('ms-reset');
         const messageEl = document.getElementById('ms-message');
         const flagBtn = document.getElementById('ms-flag-btn');
+        const rewardModal = document.getElementById('reward-modal');
+        const rewardVideoWrap = document.getElementById('reward-video-wrap');
+        const rewardClose = document.getElementById('reward-close');
+        const rewardBackdrop = document.getElementById('reward-backdrop');
+
+        const VIMEO_EMBED = '<iframe src="https://player.vimeo.com/video/1183215318?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&amp;autoplay=1" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" referrerpolicy="strict-origin-when-cross-origin" title="minecountry"></iframe>';
 
         gridEl.style.gridTemplateColumns = `repeat(${COLS}, clamp(28px, 8vw, 38px))`;
+
+        function showReward() {
+            rewardVideoWrap.innerHTML = VIMEO_EMBED;
+            rewardModal.hidden = false;
+            requestAnimationFrame(() => rewardModal.classList.add('open'));
+        }
+
+        function hideReward() {
+            rewardModal.classList.remove('open');
+            setTimeout(() => {
+                rewardModal.hidden = true;
+                rewardVideoWrap.innerHTML = '';
+            }, 250);
+        }
+
+        rewardClose.addEventListener('click', hideReward);
+        rewardBackdrop.addEventListener('click', hideReward);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !rewardModal.hidden) hideReward();
+        });
 
         function init() {
             board = Array.from({length: ROWS}, () => Array(COLS).fill(0));
@@ -47,6 +83,7 @@ layout: default
             messageEl.textContent = '';
             flagMode = false;
             flagBtn.classList.remove('active');
+            if (rewardModal && !rewardModal.hidden) hideReward();
             updateCounters();
             render();
         }
@@ -127,6 +164,7 @@ layout: default
                 flagCount = MINES;
                 updateCounters();
                 render();
+                showReward();
             }
         }
 
