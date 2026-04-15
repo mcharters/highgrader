@@ -1,9 +1,7 @@
 <!-- Emoji pixel art title -->
 <a href="{{ '/' | relative_url }}" style="text-decoration: none; color: inherit;">
 <div class="emoji-art">
-    <div class="emoji-line" id="line-high"></div>
-    <div style="height: clamp(6px, 1.5vw, 16px)"></div>
-    <div class="emoji-line" id="line-grader"></div>
+    <div class="emoji-line" id="line-title"></div>
 </div>
 </a>
 
@@ -58,6 +56,13 @@
             [1,1,1,0],
             [1,0,0,0],
             [1,1,1,1],
+        ],
+        ' ': [
+            [0,0],
+            [0,0],
+            [0,0],
+            [0,0],
+            [0,0],
         ],
     };
 
@@ -125,8 +130,7 @@
         }
     }
 
-    renderWord('line-high', 'HIGH');
-    renderWord('line-grader', 'GRADER');
+    renderWord('line-title', 'HIGH GRADER');
 
     // === NFB MINING FILM EASTER EGGS ===
     (async function loadNfbFilms() {
@@ -174,16 +178,11 @@
             if (films.length === 0) return;
 
             // Find all non-rock emoji spans in the title
-            const containers = [
-                document.getElementById('line-high'),
-                document.getElementById('line-grader')
-            ];
+            const container = document.getElementById('line-title');
             const nonRockSpans = [];
-            for (const container of containers) {
-                for (const span of container.children) {
-                    if (!span.classList.contains('off') && span.textContent !== '🪨') {
-                        nonRockSpans.push(span);
-                    }
+            for (const span of container.children) {
+                if (!span.classList.contains('off') && span.textContent !== '🪨') {
+                    nonRockSpans.push(span);
                 }
             }
 
