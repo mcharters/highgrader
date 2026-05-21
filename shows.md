@@ -18,7 +18,6 @@ permalink: /shows/
 
 <h2 class="shows-heading" data-section="upcoming">Upcoming</h2>
 <ul class="show-list upcoming"></ul>
-<p class="shows-empty" hidden><em>No shows on the books right now — check back soon.</em></p>
 
 <h2 class="shows-heading" data-section="past" hidden>Past Shows</h2>
 <ul class="show-list past"></ul>
@@ -55,7 +54,6 @@ permalink: /shows/
     var pastList = document.querySelector('.show-list.past');
     var upcomingHeading = document.querySelector('.shows-heading[data-section="upcoming"]');
     var pastHeading = document.querySelector('.shows-heading[data-section="past"]');
-    var emptyMsg = document.querySelector('.shows-empty');
 
     var upcomingCount = 0, pastCount = 0;
 
@@ -73,7 +71,6 @@ permalink: /shows/
 
     if (upcomingCount === 0) {
         upcomingHeading.hidden = true;
-        emptyMsg.hidden = false;
     }
     if (pastCount > 0) {
         pastHeading.hidden = false;
