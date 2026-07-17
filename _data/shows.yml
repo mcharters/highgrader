@@ -1,6 +1,14 @@
 # Add shows here. Newest or oldest order doesn't matter — the page sorts them.
 # Required: date (YYYY-MM-DD), venue, city
-# Optional: tickets (URL), notes (free text)
+# Optional:
+#   tickets (URL)
+#   notes   (free text)
+#   bands   (list of other acts on the bill; each has a name and optional url)
+#           e.g.
+#             bands:
+#               - name: Good Feeling
+#                 url: https://goodfeeling.example.com
+#               - name: bbbrother   # no url is fine — shows as plain text
 
 - date: 2026-05-16
   venue: Yes Indeedy (I Do) Music Fest
@@ -9,9 +17,15 @@
 - date: 2026-05-17
   venue: L'Hémisphère Gauche
   city: Montréal, QC
-  notes: with Good Feeling, bbbrother
+  bands:
+    - name: Good Feeling
+    - name: bbbrother
 - date: 2026-07-22
   venue: Yeti Cafe
   city: Kitchener, ON
-  notes: with Willem James Cowan, Haley Sheppard
+  bands:
+    - name: Willem James Cowan
+      url: https://willemjamescowan.bandcamp.com/
+    - name: Haley Sheppard
+      url: http://haleysheppard.com/
   tickets: https://www.eventbrite.ca/e/willem-james-cowan-haley-sheppard-and-high-grader-live-the-yeti-tickets-1993935720415

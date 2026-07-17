@@ -29,6 +29,9 @@ permalink: /shows/
         <div class="show-main">
             <div class="show-venue">{{ show.venue }}</div>
             <div class="show-city">{{ show.city }}</div>
+            {% if show.bands and show.bands.size > 0 %}
+            <div class="show-bands">with {% for band in show.bands %}{% if band.url %}<a href="{{ band.url }}" target="_blank" rel="noopener">{{ band.name }}</a>{% else %}{{ band.name }}{% endif %}{% unless forloop.last %}, {% endunless %}{% endfor %}</div>
+            {% endif %}
             {% if show.notes %}<div class="show-notes">{{ show.notes }}</div>{% endif %}
         </div>
         {% if show.tickets %}
