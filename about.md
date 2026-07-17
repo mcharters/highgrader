@@ -18,6 +18,7 @@ Across this fine country, there are hundreds of tiny towns that cropped up where
 ## Get in Touch
 
 Drop us a line at [highgradermusic@gmail.com](mailto:band@highgradermusic@gmail.com).
+Look at pictures we take at [@highgradermusic](https://instagram.com/highgradermusic)
 
 </div>
 </div>
