@@ -183,14 +183,28 @@
         .page-content .track-list a {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 12px 14px;
+            gap: 14px;
+            padding: 10px;
             color: #fff;
             text-decoration: none;
             font-weight: bold;
         }
-        .page-content .track-list a::before {
-            content: "▸";
+        .page-content .track-list .track-thumb {
+            flex: 0 0 auto;
+            width: 64px;
+            height: 64px;
+            object-fit: cover;
+            border: 1px solid #444;
+            border-radius: 4px;
+            margin: 0;
+            box-shadow: none;
+            transition: box-shadow 0.15s;
+        }
+        .page-content .track-list li:hover .track-thumb {
+            box-shadow: 0 0 10px rgba(176, 141, 87, 0.5);
+        }
+        .page-content .track-list .track-title::before {
+            content: "▸ ";
             color: #b08d57;
             font-weight: bold;
         }
