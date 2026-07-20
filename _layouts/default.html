@@ -165,6 +165,36 @@
         }
         .page-content p { margin: 0.8em 0; }
         .page-content a { color: #b08d57; }
+
+        /* Track list — card rows echoing the shows list */
+        .page-content .track-list {
+            list-style: none;
+            padding: 0;
+            margin: 1em 0 2em;
+        }
+        .page-content .track-list li {
+            margin-bottom: 8px;
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 6px;
+            transition: border-color 0.15s;
+        }
+        .page-content .track-list li:hover { border-color: #b08d57; }
+        .page-content .track-list a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .page-content .track-list a::before {
+            content: "▸";
+            color: #b08d57;
+            font-weight: bold;
+        }
+        .page-content .track-list li:hover a { color: #b08d57; }
         .page-content img {
             display: block;
             max-width: 100%;
