@@ -13,7 +13,7 @@ permalink: /about/
 
 HIGH GRADER is a new indie rock project from Dave Lacalamita, Matt Charters and Lisa Rafferty.
 
-Across this fine country, there are hundreds of tiny towns that cropped up wherever people could find work. The members of Highgrader have seen a lot of them from years of touring in bands, and noticed that their history often shares a common theme: mining. This project sifts through the spoils of that history, extracting stories that reflect the past and resonate with present.
+Across this fine country, hundreds of tiny towns would crop up wherever people could find work. The members of High Grader have visited many of these places from years of touring in bands and noticed a common historic thread: mining. This project sifts through the tailings of that history, extracting stories that reflect the past and resonate with the present.
 
 ## Get in Touch
 
