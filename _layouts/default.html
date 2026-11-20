@@ -209,6 +209,23 @@
             font-weight: bold;
         }
         .page-content .track-list li:hover a { color: #b08d57; }
+
+        /* Responsive 16:9 video embeds */
+        .page-content .video-embed {
+            max-width: 640px;
+            margin: 1em auto 2em;
+            border: 1px solid #333;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+        .page-content .video-embed iframe {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            height: auto;
+            border: 0;
+        }
         .page-content img {
             display: block;
             max-width: 100%;
